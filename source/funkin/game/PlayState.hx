@@ -902,6 +902,9 @@ class PlayState extends MusicBeatState
 			if (botplayTxt != null) botplayTxt.visible = botplay;
 		}
 
+		// Run botplay autohit each frame if enabled
+		if (botplay) updateBotplay(elapsed);
+
 		for(e in [healthBar, healthBarBG, iconP1, iconP2, scoreTxt, missesTxt, accuracyTxt])
 			e.cameras = [camHUD];
 		#end
@@ -944,7 +947,7 @@ class PlayState extends MusicBeatState
 
 		// Initialize botplay UI
 		botplayTxt = new FlxText(healthBar.x + healthBar.width / 2 - 75, healthBar.y + (Options.downscroll ? 100 : -100), 0, "BOTPLAY", 20);
-		botplayTxt.setFormat(Paths.font("vcr.ttf"), 42, FlxColor.WHITE, RIGHT);
+		botplayTxt.setFormat(Paths.font("vcr.ttf"), 42, FlxColor.WHITER, FlxTextBorderStyle.OUTLINE, FlxColor.BLACK, RIGHT);
 		botplayTxt.scrollFactor.set();
 		botplayTxt.borderSize = 3;
 		botplayTxt.cameras = [camHUD];
@@ -2106,6 +2109,65 @@ class PlayState extends MusicBeatState
 				});
 			}
 		}
+	}
+
+	/**
+	 * Auto-player: finds nearby notes and triggers hits for the player's strumline.
+	 */
+	public function botplayAutoHit():Void {
+		var pl = playingStrumline;
+		if (pl == null) return;
+
+		if (botplayTxt != null) botplayTxt.visible = true;
+
+		var possible:Array<Note> = [];
+		// collect hittable notes
+		if (pl.notes != null) for (n in pl.notes.members) {
+			if (n == null) continue;
+			if (n.wasGoodHit) continue;
+			if (n.avoid) continue;
+			possible.push(n);
+		}
+
+		// sort by proximity to current song position
+		possible.sort(function(a:Note, b:Note):Int {
+			return Reflect.compare(Math.abs(Conductor.songPosition - a.strumTime), Math.abs(Conductor.songPosition - b.strumTime));
+		});
+
+		// hit tappable notes (non-sustain heads)
+		for (note in possible) {
+			if (note == null) continue;
+			if (note.wasGoodHit) continue;
+			if (note.isSustainNote) continue;
+
+			// perform hit
+			goodNoteHit(pl, note);
+
+			// animate strum if possible
+			if (note.strumID < pl.members.length && pl.members[note.strumID] != null) {
+				pl.members[note.strumID].press(Conductor.songPosition);
+			}
+		}
+
+		// handle sustain pieces that need hitting (mark sustain pieces as hit when passed)
+		if (pl.notes != null) for (n in pl.notes.members) {
+			if (n == null) continue;
+			if (!n.isSustainNote) continue;
+			if (n.wasGoodHit) continue;
+			if (n.avoid) continue;
+			if (Conductor.songPosition >= n.strumTime) {
+				goodNoteHit(pl, n);
+				if (n.strumID < pl.members.length && pl.members[n.strumID] != null) pl.members[n.strumID].press(Conductor.songPosition);
+			}
+		}
+	}
+
+	/**
+	 * Wrapper called from update to maintain botplay each frame.
+	 */
+	public function updateBotplay(elapsed:Float):Void {
+		if (!botplay) return;
+		botplayAutoHit();
 	}
 
 	public inline function deleteNote(note:Note)
