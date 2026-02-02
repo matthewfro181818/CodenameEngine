@@ -4481,7 +4481,7 @@ class PlayState extends MusicBeatState
 		fromMods = SONG.fromMods;
 	}
 }
-
+}
 final class ComboRating {
 	public var percent:Float;
 	public var rating:String;
