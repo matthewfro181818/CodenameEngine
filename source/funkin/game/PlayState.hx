@@ -2156,16 +2156,16 @@ class PlayState extends MusicBeatState
 
 		 // handle sustain pieces that need hitting (mark sustain pieces as hit when passed)
 		if (pl.notes != null) {
-			var notes = cast(pl.notes.members, Array<Note>);
-			for (n in notes) {
-				if (n == null) continue;
-				if (!n.isSustainNote) continue;
-				if (n.wasGoodHit) continue;
-				if (n.avoid) continue;
-				if (Conductor.songPosition >= n.strumTime) {
-					goodNoteHit(pl, n);
-					if (n.strumID < pl.members.length && pl.members[n.strumID] != null)
-						pl.members[n.strumID].press(Conductor.songPosition);
+			for (n in pl.notes.members) {
+				var nn:Note = cast(n, Note);
+				if (nn == null) continue;
+				if (!nn.isSustainNote) continue;
+				if (nn.wasGoodHit) continue;
+				if (nn.avoid) continue;
+				if (Conductor.songPosition >= nn.strumTime) {
+					goodNoteHit(pl, nn);
+					if (nn.strumID < pl.members.length && pl.members[nn.strumID] != null)
+						pl.members[nn.strumID].press(Conductor.songPosition);
 				}
 			}
 		}
