@@ -2120,14 +2120,19 @@ class PlayState extends MusicBeatState
 
          if (botplayTxt != null) botplayTxt.visible = true;
 
-         var possible:Array<Note> = [];
-         // collect hittable notes
-		if (pl.notes != null) for (n in cast(pl.notes.members:Array<Note>)) {
-			if (n == null) continue;
-			if (n.wasGoodHit) continue;
-			if (n.avoid) continue;
-			possible.push(n);
-		}
+		 var possible:Array<Note> = [];
+		 // collect hittable notes
+		 if (pl.notes != null) {
+			 for (n in pl.notes.members) {
+				 var nn:Note = cast(n, Note);
+				 if (nn == null) continue;
+				 if (nn.wasGoodHit) continue;
+				 if (nn.avoid) continue;
+				 if (Math.abs(Conductor.songPosition - nn.strumTime) <= hitWindow) {
+					 possible.push(nn);
+				 }
+			 }
+		 }
 
          // sort by proximity to current song position
          possible.sort(function(a:Note, b:Note):Int {
@@ -2149,15 +2154,19 @@ class PlayState extends MusicBeatState
 			}
 		}
 
-         // handle sustain pieces that need hitting (mark sustain pieces as hit when passed)
-		if (pl.notes != null) for (n in cast(pl.notes.members:Array<Note>)) {
-			if (n == null) continue;
-			if (!n.isSustainNote) continue;
-			if (n.wasGoodHit) continue;
-			if (n.avoid) continue;
-			if (Conductor.songPosition >= n.strumTime) {
-				goodNoteHit(pl, n);
-				if (n.strumID < pl.members.length && pl.members[n.strumID] != null) pl.members[n.strumID].press(Conductor.songPosition);
+		 // handle sustain pieces that need hitting (mark sustain pieces as hit when passed)
+		if (pl.notes != null) {
+			var notes = cast(pl.notes.members, Array<Note>);
+			for (n in notes) {
+				if (n == null) continue;
+				if (!n.isSustainNote) continue;
+				if (n.wasGoodHit) continue;
+				if (n.avoid) continue;
+				if (Conductor.songPosition >= n.strumTime) {
+					goodNoteHit(pl, n);
+					if (n.strumID < pl.members.length && pl.members[n.strumID] != null)
+						pl.members[n.strumID].press(Conductor.songPosition);
+				}
 			}
 		}
 	}
