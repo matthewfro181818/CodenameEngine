@@ -2121,6 +2121,7 @@ class PlayState extends MusicBeatState
          if (botplayTxt != null) botplayTxt.visible = true;
 
 		 var possible:Array<Note> = [];
+		 var hw:Float = Flags.USE_LEGACY_TIMING ? hitWindow : ratingManager.lastHitWindow;
 		 // collect hittable notes
 		 if (pl.notes != null) {
 			 for (n in pl.notes.members) {
@@ -2128,7 +2129,7 @@ class PlayState extends MusicBeatState
 				 if (nn == null) continue;
 				 if (nn.wasGoodHit) continue;
 				 if (nn.avoid) continue;
-				 if (Math.abs(Conductor.songPosition - nn.strumTime) <= hitWindow) {
+				 if (Math.abs(Conductor.songPosition - nn.strumTime) <= hw) {
 					 possible.push(nn);
 				 }
 			 }
