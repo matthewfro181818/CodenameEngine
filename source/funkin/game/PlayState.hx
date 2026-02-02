@@ -944,9 +944,9 @@ class PlayState extends MusicBeatState
 
 		// Initialize botplay UI
 		botplayTxt = new FlxText(healthBar.x + healthBar.width / 2 - 75, healthBar.y + (Options.downscroll ? 100 : -100), 0, "BOTPLAY", 20);
-		botplayTxt.setFormat(Paths.font("vcr.ttf"), 42 * fontScaler, FlxColor.WHITE, RIGHT);
+		botplayTxt.setFormat(Paths.font("vcr.ttf"), 42, FlxColor.WHITE, RIGHT);
 		botplayTxt.scrollFactor.set();
-		botplayTxt.borderSize = 3 * fontScaler;
+		botplayTxt.borderSize = 3;
 		botplayTxt.cameras = [camHUD];
 		botplay = Options.botplay;
 		botplayTxt.visible = botplay;
